@@ -1,0 +1,5 @@
+4,-330,-500,,,,,
+block1,0,0,0.9,0,square,,
+block2,50,0,0.6,0,triangle,upL,
+block3,100,0,0.3,1,square,,
+block4,150,0,0.6,1,triangle,downR,
