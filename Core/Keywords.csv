@@ -1,2 +1,3 @@
-StartScreen,Core.IntroScreen
+3D,Core.3DRunner
+StartScreen,Core.StartScreen
 StartMenu,Core.StartMenu

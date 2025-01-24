@@ -1,5 +1,8 @@
 -- [[ MAIN CORE STUFF ]] -- =========================================================
 system.activate("multitouch")
+local physics = require("physics")
+system.activate( "physics" )
+physics.start()
 local io = require("io")
 local currentScene = ""
 local currentLoad = ""
@@ -23,6 +26,7 @@ local function replace_commas_with_forex(text)
     -- print("Result: "..result)
     return result
 end
+
 -- Parse the CSV
 local function parse_csv_to_array(oldCsv)
     -- The 2D array
@@ -39,14 +43,16 @@ local function parse_csv_to_array(oldCsv)
     return array
 end
 
+
 -- Write the StartScreen
 local FileTemp = io.open( system.pathForFile( "temp.csv", system.DocumentsDirectory ), "w" )
 if FileTemp then
-    -- FileTemp:write("New,StartScreen")
-    FileTemp:write("New,StartMenu")
+    FileTemp:write("New,StartScreen")
     io.close( FileTemp )
 else print ("Error: Cannot overwrite file to be reset - File does not exist - Line 47")
 end
+
+
 
 -- [[ Read the Scene ]] -- ===========================================================
 -- Overwrite "FileTemp"
@@ -62,6 +68,8 @@ function readWriteTempFile(option)
         io.close( FileTempRaw )
     end
 end readWriteTempFile("O")
+
+
 
 -- [[ Load the Scene Manager ]] -- ==================================================
 local function updateSceneManager()
@@ -82,7 +90,7 @@ local function sceneHandler(scene)
             currentLoad = require(scene)
             currentLoad.Start()
             break
-        else print("not scene "..scene)
+        else print("No scene known as "..scene)
         end
     end
 end
@@ -101,5 +109,8 @@ local function CheckUpdate()
     end
 end
 
--- Check update every second
-timer.performWithDelay(2200, function() CheckUpdate() end, 0)
+-- Check update every once in a while
+timer.performWithDelay(3300, CheckUpdate, 0)
+
+
+-- timer.performWithDelay(4000, function() currentLoad.Yeild() end, 1)
