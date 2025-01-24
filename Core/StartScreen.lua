@@ -3,7 +3,6 @@
 -- =======================
 
 local io = require("io")
--- local file = require("file")
 
 local fullw         = display.actualContentWidth
 local fullh         = display.actualContentHeight
@@ -111,15 +110,19 @@ function Animate(option)
         -- [[ Remove enterFrame listeners ]]
         Runtime:removeEventListener( scrollBgObjects )        
         -- [[ Remove Parts by alpha tween ]]
-        transition.to(lightBlueUp, {alpha = 0, time = 200})
-        transition.to(lightBlueDown, {alpha = 0, time = 200})
-        transition.to(darkBlueUp, {alpha = 0, time = 200})
-        transition.to(darkBlueDown, {alpha = 0, time = 200})
+        transition.to(lightBlueUp, {alpha = 0, time = 400})
+        transition.to(lightBlueDown, {alpha = 0, time = 400})
+        transition.to(darkBlueUp, {alpha = 0, time = 400})
+        transition.to(darkBlueDown, {alpha = 0, time = 400})
         transition.to(title0, {alpha = 0, time = 200})
         transition.to(title1, {alpha = 0, time = 200})
         transition.to(lines, {alpha = 0, time = 200})
-        transition.to(background, {alpha = 0, time = 200})
+        transition.to(background, {alpha = 0, time = 100})
         transition.to(startText, {alpha = 0, time = 200})
+        transition.to(bgScroll0a, {alpha = 0, time = 600})
+        transition.to(bgScroll0b, {alpha = 0, time = 600})
+        transition.to(bgScroll1a, {alpha = 0, time = 600})
+        transition.to(bgScroll1b, {alpha = 0, time = 600})
 
         -- Special
         transition.to(testy, {alpha = 0, time = 300, delay = 400})
@@ -130,6 +133,9 @@ end
 
 -- Function that removes all objects
 local function objRemover()
+    -- Remove listeners
+    Runtime:removeEventListener( "enterFrame", scrollBgObjects )
+
     -- Remove all objects
     display.remove(background)
     display.remove(lightBlueUp)
@@ -157,6 +163,12 @@ local function objRemover()
     title0 = nil
     title1 = nil
     lines = nil
+    flash = nil
+    startText = nil
+    bgScroll0a = nil
+    bgScroll0b = nil
+    bgScroll1a = nil
+    bgScroll1b = nil
 end
 
 local function fade()
@@ -169,30 +181,34 @@ local function fade()
 
     -- Write to file with a little delay
     timer.performWithDelay( 750, function()
-        local file = io.open( system.pathForFile( "temp.csv", system.DocumentsDirectory ), "w" )
-        if file then
-            file:write( "New,StartMenu" )
-            io.close( file )
-            print( "File write successful" )
-        else
-            print( "File write failed" )
-        end
-    end, 1 )
+        -- local file = io.open( system.pathForFile( "temp.csv", system.DocumentsDirectory ), "w" )
+        -- if file then
+        --     file:write( "New,StartMenu" )
+        --     io.close( file )
+        --     print( "File write successful" )
+        -- else
+        --     print( "File write failed" )
+        -- end
+    end)
 end
 
---  Touch to start
-Runtime:addEventListener( "touch", fade )
+-- --  Touch to start
+-- Runtime:addEventListener( "touch", fade )
 
 -- =======================
 -- [[ Function Calling ]]
 -- =======================
-local introScreen = {}
+local StartScreen = {}
 
-function introScreen.Start()
+function StartScreen.Start()
     print("Start Screen Anim")
     Animate("add")
     Animate("animate")
 end
 
+function StartScreen.Yield()
+    fade()
+end
+
 -- Need to return or Solar2D will run into errors. It's not really returning any value
-return introScreen
+return StartScreen
