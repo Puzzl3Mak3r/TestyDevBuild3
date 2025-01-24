@@ -140,6 +140,12 @@ local function objRemover()
     display.remove(title0)
     display.remove(title1)
     display.remove(lines)
+    display.remove(flash)
+    display.remove(startText)
+    display.remove(bgScroll0a)
+    display.remove(bgScroll0b)
+    display.remove(bgScroll1a)
+    display.remove(bgScroll1b)
 
     -- Set objects to nil
     background = nil
