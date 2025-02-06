@@ -181,19 +181,19 @@ local function fade()
 
     -- Write to file with a little delay
     timer.performWithDelay( 750, function()
-        -- local file = io.open( system.pathForFile( "temp.csv", system.DocumentsDirectory ), "w" )
-        -- if file then
-        --     file:write( "New,StartMenu" )
-        --     io.close( file )
-        --     print( "File write successful" )
-        -- else
-        --     print( "File write failed" )
-        -- end
+        local file = io.open( system.pathForFile( "temp.csv", system.DocumentsDirectory ), "w" )
+        if file then
+            file:write( "New,StartMenu" )
+            io.close( file )
+            print( "File write successful" )
+        else
+            print( "File write failed" )
+        end
     end)
 end
 
--- --  Touch to start
--- Runtime:addEventListener( "touch", fade )
+--  Touch to start
+Runtime:addEventListener( "touch", fade )
 
 -- =======================
 -- [[ Function Calling ]]

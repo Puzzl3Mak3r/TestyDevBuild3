@@ -45,12 +45,13 @@ end
 
 
 -- Write the StartScreen
-local FileTemp = io.open( system.pathForFile( "temp.csv", system.ResourceDirectory ), "w" )
+local FileTemp = io.open( system.pathForFile( "temp.csv", system.DocumentsDirectory ), "w" )
 if FileTemp then
     FileTemp:write("New,StartScreen")
+    -- FileTemp:write("Old,")
     io.close( FileTemp )
     print ("File write successful")
-else print ("Error: Cannot overwrite file to be reset - File does not exist - Line 47")
+else print ("Error: Cannot overwrite file to be reset - File does not exist - Line 51")
 end
 
 
@@ -59,12 +60,12 @@ end
 -- Overwrite "FileTemp"
 function readWriteTempFile(option)
     if option == "O" then
-        FileTempRaw = io.open( system.pathForFile( "temp.csv", system.ResourceDirectory ), "r" )
+        FileTempRaw = io.open( system.pathForFile( "temp.csv", system.DocumentsDirectory ), "r" )
         FileTemp = parse_csv_to_array(FileTempRaw:read("*a"))
         print ("closed file")
         io.close( FileTempRaw )
     elseif option == "C" then
-        FileTempRaw = io.open( system.pathForFile( "temp.csv", system.ResourceDirectory ), "w" )
+        FileTempRaw = io.open( system.pathForFile( "temp.csv", system.DocumentsDirectory ), "w" )
         FileTempRaw:write("Old,")
         io.close( FileTempRaw )
     end
@@ -73,30 +74,30 @@ readWriteTempFile("O")
 
 
 
--- -- [[ Load the Scene Manager ]] -- ==================================================
--- local function updateSceneManager()
---     local KeyWords = io.open( system.pathForFile("Core/Keywords.csv", system.ResourceDirectory), "r" )
---     if KeyWords then
---         SceneManager = parse_csv_to_array(KeyWords:read("*a"))
---     end
--- end
--- -- updateSceneManager()
+-- [[ Load the Scene Manager ]] -- ==================================================
+local function updateSceneManager()
+    local KeyWords = io.open( system.pathForFile("Core/Keywords.csv", system.ResourceDirectory), "r" )
+    if KeyWords then
+        SceneManager = parse_csv_to_array(KeyWords:read("*a"))
+    end
+end
+updateSceneManager()
 
 
--- local function sceneHandler(scene)
+local function sceneHandler(scene)
 
---     -- Iterate through each possible keyword
---     for i = 1, #SceneManager do
---         if SceneManager[i][1] == scene then
---             print( "scene"..scene )
---             scene = SceneManager[i][2]
---             currentLoad = require(scene)
---             currentLoad.Start()
---             break
---         else print("No scene known as "..scene)
---         end
---     end
--- end
+    -- Iterate through each possible keyword
+    for i = 1, #SceneManager do
+        if SceneManager[i][1] == scene then
+            print( "scene"..scene )
+            scene = SceneManager[i][2]
+            currentLoad = require(scene)
+            currentLoad.Start()
+            break
+        else print("No scene known as "..scene)
+        end
+    end
+end
 
 
 local function CheckUpdate()
@@ -105,7 +106,7 @@ local function CheckUpdate()
     if FileTemp[1][1] == "New" then
         print ("New Scene")
         currentScene = FileTemp[1][2]
-        -- sceneHandler(currentScene)
+        sceneHandler(currentScene)
 
         -- Reset the temp file
         readWriteTempFile("C")
@@ -116,4 +117,4 @@ end
 timer.performWithDelay(3300, CheckUpdate, 0)
 
 
--- -- timer.performWithDelay(4000, function() currentLoad.Yeild() end, 1)
+-- timer.performWithDelay(4000, function() currentLoad.Yeild() end, 1)
