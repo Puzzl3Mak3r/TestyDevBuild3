@@ -4,8 +4,6 @@
 
 local io = require("io")
 
-local fullw         = display.actualContentWidth
-local fullh         = display.actualContentHeight
 local cx            = display.contentCenterX
 local cy            = display.contentCenterY
 local screenX       = display.contentWidth
@@ -59,21 +57,69 @@ function Animate(option)
 
         -- Testy
         testy = display.newImageRect("Assets/Images/StartScreen/testy.png", 720, 459) -- 0.75*960 = 720, 0.85*540 = 459
-        testy.x, testy.y = -1920, 621 -- -2*960 = -1920, 540*1.15 = 621
+        testy.x, testy.y = -1920, 621
 
         -- Words
-        title0 = display.newImageRect("Assets/Images/StartScreen/title0.png", 1280, 720)
-        title1 = display.newImageRect("Assets/Images/StartScreen/title1.png", 1280, 720)
-        title0.x, title0.y = -2880, 580 -- -3*960 = -2880, 540+10 = 550
-        title1.x, title1.y = 1000, -1620 -- 960+40 = 1000, -3*540 = -1620
+        local options =
+        {
+            width = 100,
+            height = 100,
+            numFrames = 10,
+            sheetContentWidth = 541,  --width of original 1x size of entire sheet
+            sheetContentHeight = 140  --height of original 1x size of entire sheets
+            -- width = 50,
+            -- height = 50,
+            -- numFrames = 4
+            -- frames =
+            -- {
+            --     {   -- frame 1
+            --         x = 0,
+            --         y = 0,
+            --         width = 541,
+            --         height = 35
+            --     },
+            --     {   -- frame 2
+            --         x = 0,
+            --         y = 35,
+            --         width = 541,
+            --         height = 35
+            --     },
+            --     {   -- frame 3
+            --         x = 0,
+            --         y = 70,
+            --         width = 541,
+            --         height = 35
+            --     },
+            --     {   -- frame 4
+            --         x = 0,
+            --         y = 105,
+            --         width = 541,
+            --         height = 35
+            --     }
+            -- }
+        }
+        local wordsOptions = graphics.newImageSheet( "Assets/Images/StartScreen/Start_Asset.png", options )
+
+        words = display.newImageRect( wordsOptions, 1 )
+        words.x, words.y = cx, cy
 
         -- Lines
         lines = display.newImageRect("Assets/Images/StartScreen/lines.png", 79*3, 3*155)
-        lines.x, lines.y = -3840, 573 -- -4*960 = -3840, 17*540/16 = 573
+        lines.x, lines.y = cx - 450, cy + 70
+
+        -- Title
+        local scaleTitle = 1.4
+        Title0 = display.newImageRect("Assets/Images/StartScreen/Title0.png", 1280 * scaleTitle, 720 * scaleTitle)
+        Title1 = display.newImageRect("Assets/Images/StartScreen/Title1.png", 1280 * scaleTitle, 720 * scaleTitle)
+        Title0.x, Title0.y = cx, cy - 50
+        Title1.x, Title1.y = cx, cy - 50
+        Title1.alpha = 0
+
 
         -- Start text "Press to Start" and make invisible
         startText = display.newText("Press to Start", adjustX * 3200, adjustY * 1800, nil, 30) -- (5/3)*960 = 3200, (5/3)*540 = 1800
-        startText.alpha = 0
+        -- startText.alpha = 0
+        -- startText.x, startText.y = 960, 540
 
         -- Create flash graphic without image, as big as screen
         flash = display.newRect(960, 540, 3 * screenX, 3 * screenY)
