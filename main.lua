@@ -43,18 +43,13 @@ local function parse_csv_to_array(oldCsv)
     return array
 end
 
-
 -- Write the StartScreen
 local FileTemp = io.open( system.pathForFile( "temp.csv", system.DocumentsDirectory ), "w" )
 if FileTemp then
     FileTemp:write("New,StartScreen")
-    -- FileTemp:write("Old,")
     io.close( FileTemp )
-    print ("File write successful")
-else print ("Error: Cannot overwrite file to be reset - File does not exist - Line 51")
+else print ("Error: Cannot overwrite file to be reset - File does not exist - Line 47")
 end
-
-
 
 -- [[ Read the Scene ]] -- ===========================================================
 -- Overwrite "FileTemp"
@@ -69,10 +64,7 @@ function readWriteTempFile(option)
         FileTempRaw:write("Old,")
         io.close( FileTempRaw )
     end
-end
-readWriteTempFile("O")
-
-
+end readWriteTempFile("O")
 
 -- [[ Load the Scene Manager ]] -- ==================================================
 local function updateSceneManager()
@@ -80,8 +72,7 @@ local function updateSceneManager()
     if KeyWords then
         SceneManager = parse_csv_to_array(KeyWords:read("*a"))
     end
-end
-updateSceneManager()
+end updateSceneManager()
 
 
 local function sceneHandler(scene)
@@ -94,7 +85,7 @@ local function sceneHandler(scene)
             currentLoad = require(scene)
             currentLoad.Start()
             break
-        else print("No scene known as "..scene)
+        else print("not scene "..scene)
         end
     end
 end
@@ -113,8 +104,5 @@ local function CheckUpdate()
     end
 end
 
--- Check update every once in a while
-timer.performWithDelay(3300, CheckUpdate, 0)
-
-
--- timer.performWithDelay(4000, function() currentLoad.Yeild() end, 1)
+-- Check update every second
+timer.performWithDelay(2200, function() CheckUpdate() end, 0)

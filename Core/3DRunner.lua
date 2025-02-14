@@ -9,10 +9,11 @@ local moveRight, moveLeft, moveForward = false, false, false
 local diffX, diffY = 0, 0
 local RayLine = {} -- for displaying line, will not be used except for dev building
 local raycastDistance = {}
-local wallGroup = display.newGroup()
-local objectsGroup = display.newGroup()
-local FOV = 200
-local SPREAD = FOV / 100
+local FOV = 400
+local SPREAD = FOV / 90
+
+
+-- [[ 2D ]] -- ===============================================
 
 -- Physics
 local physics = require( "physics" )
@@ -22,27 +23,68 @@ physics.setGravity( 0, 0 )
 -- Player
 local player = display.newPolygon( cx, cy, {0,0, 40,20, 0,40, 10,20}) -- Pointed Arrow
 -- Circle player collision
-physics.addBody( player, "dynamic", { radius=15 } )
+physics.addBody( player, "static", { radius=15 } )
 
 -- Enemy
 local enemy = display.newPolygon( cx+100, cy, {0,0, 40,20, 0,40, 10,20}) -- Pointed Arrow
--- Circle player collision
-physics.addBody( enemy, "dynamic", { radius=15 } )
+physics.addBody( enemy, "static", { radius=1 } )
 enemy.name = "object"
 enemy.objectType = "enemy"
+
+-- Create a 2D representation of the 3D environment
+local wall1 = display.newRect(0, 0, 100, 300)
+wall1.x = 600
+wall1.y = 800
+
+local wall2 = display.newRect(0, 0, 100, 300)
+wall2.x = 300
+wall2.y = 600
+
+
+-- Add 2D elements to the group
+local _2Dgroup = display.newGroup()
+_2Dgroup.x, _2Dgroup.y = cx, cy
+
+_2Dgroup:insert(player)
+_2Dgroup:insert(enemy)
+_2Dgroup:insert(wall1)
+_2Dgroup:insert(wall2)
+
+_2Dgroup.x, _2Dgroup.y = 690, 270
+
+-- physics.setDrawMode( "hybrid" )
+
+
+-- [[ 3D ]] -- ===============================================
+
+local overlay2d = display.newImageRect( "Assets/3D/overlay.png", 1920, 1080 )
+overlay2d.x, overlay2d.y = cx,cy
+
+
+-- Groups
+local wallGroup = display.newGroup()
+local objectsGroup = display.newGroup()
+
+-- Apply Physics
+physics.addBody(wall1, "static")
+physics.addBody(wall2, "static")
+wall1.name = "wall"
+wall2.name = "wall"
+
 
 -- Move player
 local function MovePlayer()
     if moveRight then
-        player:rotate(4)
+        player:rotate(3)
     end
     if moveLeft then
-        player:rotate(-4)
+        player:rotate(-3)
     end
 
     -- Move Forward
     diffX, diffY = math.cos(math.rad(player.rotation)), math.sin(math.rad(player.rotation))
     if moveForward then
+        _2Dgroup:translate( -3*diffX, -3*diffY )
         player:translate(3 * diffX, 3 * diffY)
     end
 end
@@ -81,25 +123,6 @@ local function keyRunner()
 end
 Runtime:addEventListener( "key", onKeyEvent )
 Runtime:addEventListener( "enterFrame", keyRunner )
-
-
-
--- Create a 2D representation of the 3D environment
-local wall1 = display.newRect(0, 0, 100, 300)
-wall1.x = 600
-wall1.y = 800
-
-local wall2 = display.newRect(0, 0, 100, 300)
-wall2.x = 300
-wall2.y = 600
-
--- Apply Physics
-physics.addBody(wall1, "static")
-physics.addBody(wall2, "static")
-wall1.name = "wall"
-wall2.name = "wall"
-
--- physics.setDrawMode( "hybrid" )
 
 -- Determine posisition in front of player using direction
 player.rotation = 360
@@ -143,16 +166,18 @@ local function createWalls(wallNum, wallDistance)
     wallGroup:insert(wall)
 end
 
-
 -- Display Objects
 local function displayObjects(xPos, distance, objectType)
     -- Display
     local object = display.newRect( 192/9 * (xPos - 0.5) / (FOV/100), cy, 20, 20 )
     object.fill = {1,0,0}
-    object.alpha = 0.1
+    -- object.alpha = 
+
+    -- Add to objectsGroup
+    objectsGroup:insert(object)
 
     -- Scale
-    local scale = math.floor(3000/(distance))
+    local scale = (3000/(distance))
     object.yScale = scale
     print (scale)
 end
@@ -163,9 +188,9 @@ local function castRays()
     local rays = {}
     for i = 1, FOV do
         rays[i] = physics.rayCast(player.x, player.y, playerDirection(i))
-        -- Display a line representing the ray
-        RayLine[i] = display.newLine(player.x, player.y, playerDirection(i))
-        RayLine[i].strokeWidth, RayLine[i].alpha = 2, 0.1
+        -- -- Display a line representing the ray
+        -- RayLine[i] = display.newLine(player.x, player.y, playerDirection(i))
+        -- RayLine[i].strokeWidth, RayLine[i].alpha = 2, 0.1
         if ( rays[i] ) then
             -- Distance formula
             raycastDistance[i] = math.sqrt( (player.x - rays[i][1].position.x)^2 + (player.y - rays[i][1].position.y)^2 )

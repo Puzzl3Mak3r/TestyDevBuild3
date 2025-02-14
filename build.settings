@@ -5,10 +5,6 @@
 
 settings =
 {
-	window =
-    {
-        defaultMode = "fullscreen",
-    }, 
 	orientation =
 	{
 		-- Supported values for orientation:

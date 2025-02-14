@@ -11,7 +11,6 @@ application =
 		height = 1920,
 		scale = "letterbox",
 		fps = 60,
-		-- scale = "adaptive",
 
 		--[[
 		imageSuffix =

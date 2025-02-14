@@ -43,8 +43,8 @@ end
 function StartPlayingPlatformer()
 
     if platform == "mobile" then
-        leftArrow =display.newImageRect( 'Assets/Images/UI/playing/arrowLeft.png', 150, 100 )
-        rightArrow =display.newImageRect( 'Assets/Images/UI/playing/arrowRight.png', 150, 100 )
+        leftArrow =display.newImageRect( 'Assets/UI/playing/arrowLeft.png', 150, 100 )
+        rightArrow =display.newImageRect( 'Assets/UI/playing/arrowRight.png', 150, 100 )
         leftArrow.x, leftArrow.y = cx+650,screenY-(cy/2.5)
         rightArrow.x, rightArrow.y = cx-650,screenY-(cy/2.5)
         leftArrow.name,rightArrow.name = "right","left"
