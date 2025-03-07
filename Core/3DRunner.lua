@@ -10,7 +10,11 @@ local diffX, diffY = 0, 0
 local RayLine = {} -- for displaying line, will not be used except for dev building
 local raycastDistance = {}
 local FOV = 400
+local count = 1
 local SPREAD = FOV / 90
+local inventory = {
+    keys = 0
+}
 
 
 -- [[ 2D ]] -- ===============================================
@@ -18,18 +22,26 @@ local SPREAD = FOV / 90
 -- Physics
 local physics = require( "physics" )
 physics.start()
-physics.setGravity( 0, 0 )
+-- physics.setDrawMode( "hybrid" )
 
 -- Player
 local player = display.newPolygon( cx, cy, {0,0, 40,20, 0,40, 10,20}) -- Pointed Arrow
 -- Circle player collision
-physics.addBody( player, "static", { radius=15 } )
+physics.addBody( player, "static", { radius = 15 } )
 
 -- Enemy
-local enemy = display.newPolygon( cx+100, cy, {0,0, 40,20, 0,40, 10,20}) -- Pointed Arrow
-physics.addBody( enemy, "static", { radius=1 } )
+local enemy = display.newImageRect( "Assets/Images/3D/badGuy.png", 60, 60 )
+enemy.x, enemy.y = cx, cy + 100
+physics.addBody( enemy, "static", { radius = 1 } )
 enemy.name = "object"
 enemy.objectType = "enemy"
+
+-- Key
+local key = display.newImageRect( "Assets/Images/3D/key.png", 60, 60 )
+key.x, key.y = cx + 100, cy + 200
+physics.addBody( key, "static", { radius = 1 } )
+key.name = "object"
+key.objectType = "key"
 
 -- Create a 2D representation of the 3D environment
 local wall1 = display.newRect(0, 0, 100, 300)
@@ -45,10 +57,11 @@ wall2.y = 600
 local _2Dgroup = display.newGroup()
 _2Dgroup.x, _2Dgroup.y = cx, cy
 
-_2Dgroup:insert(player)
-_2Dgroup:insert(enemy)
-_2Dgroup:insert(wall1)
-_2Dgroup:insert(wall2)
+_2Dgroup:insert( player )
+_2Dgroup:insert( enemy )
+_2Dgroup:insert( key )
+_2Dgroup:insert( wall1 )
+_2Dgroup:insert( wall2 )
 
 _2Dgroup.x, _2Dgroup.y = 690, 270
 
@@ -57,9 +70,11 @@ _2Dgroup.x, _2Dgroup.y = 690, 270
 
 -- [[ 3D ]] -- ===============================================
 
-local overlay2d = display.newImageRect( "Assets/3D/overlay.png", 1920, 1080 )
+local overlay2d = display.newImageRect( "Assets/Images/3D/overlay.png", 1920, 1080 )
 overlay2d.x, overlay2d.y = cx,cy
 
+local collectPrompt = display.newText( "Press space to pick up key", cx, cy + 430, native.systemFont, 70 )
+collectPrompt.alpha = 0
 
 -- Groups
 local wallGroup = display.newGroup()
@@ -120,6 +135,9 @@ local function keyRunner()
     if pressedKeys["w"] or pressedKeys["up"] then
         moveForward = true
     else moveForward = false end
+
+    -- For the counter
+    count = count + 0.05
 end
 Runtime:addEventListener( "key", onKeyEvent )
 Runtime:addEventListener( "enterFrame", keyRunner )
@@ -162,24 +180,59 @@ local function createWalls(wallNum, wallDistance)
     local darkness = 1 - (wallDistance / 1000)
     wall.fill = {darkness, darkness, darkness}
 
+    -- Stop moving if wall is too close (fake collision)
+    if wallDistance <= 20 then
+        moveForward = false
+    end
+
     -- Join wall group
     wallGroup:insert(wall)
 end
 
 -- Display Objects
-local function displayObjects(xPos, distance, objectType)
-    -- Display
-    local object = display.newRect( 192/9 * (xPos - 0.5) / (FOV/100), cy, 20, 20 )
-    object.fill = {1,0,0}
-    -- object.alpha = 
+local function displayObjects(xPos, distance, objectType, object)
+    -- Display prompt
+    collectPrompt.alpha = 0
+
+    -- Create objects
+    if objectType == "enemy" then
+        object = display.newImageRect( "Assets/Images/3D/badGuy.png", 12, 12 )
+        object.x, object.y = 192/9 * (xPos - 0.5) / (FOV/100), cy
+        -- display.newImageRect( [parent,] filename, [baseDir,] width, height )
+    elseif objectType == "key" then
+        if distance <= 0 then
+            if  pressedKeys["space"] then
+                inventory.keys = inventory.keys + 1
+                object:removeSelf()
+                print ( "You picked up a key" )
+                print ( "You have " .. inventory.keys .. " keys" )
+            else
+                collectPrompt.alpha = 1
+            end
+        end
+        object = display.newImageRect( "Assets/Images/3D/key.png", 12, 12 )
+        object.x, object.y = 192/9 * (xPos - 0.5) / (FOV/100), cy
+        object.alpha = 0.15
+        object.spin = true
+    else
+        object = display.newRect( 192/9 * (xPos - 0.5) / (FOV/100), cy, 20, 20 )
+        object.fill = {1,0,0}
+    end
 
     -- Add to objectsGroup
     objectsGroup:insert(object)
 
     -- Scale
     local scale = (3000/(distance))
-    object.yScale = scale
-    print (scale)
+    object.xScale, object.yScale = scale, scale
+
+    -- Spin
+    if count <= -359 or count >= 359 then count = -359 end
+    local spinValue = math.sin( count )
+    -- print( "spinvalue:" .. spinValue )
+    if object.spin then
+        object.xScale = spinValue * scale * 1.2
+    end
 end
 
 
@@ -202,7 +255,7 @@ local function castRays()
 
             -- Create object
             if rays[i][1].object.name == "object" then
-                displayObjects(i, raycastDistance[i], rays[i][1].object.objectType)
+                displayObjects(i, raycastDistance[i], rays[i][1].object.objectType, rays[i][1].object)
             end
         end
     end
