@@ -55,57 +55,113 @@ Runtime:addEventListener("enterFrame", moveCamera) -- never got used
 
 
 ------------------------------------------------------------------------------------
--- Move Player
+-- Move Player -- Virtual Joystick - Made by PonyWolf
 ------------------------------------------------------------------------------------
 
 local moveRight, moveLeft = false, false
 local moveUp, moveDown = false, false
-local pressedKeys = {}
 
-local function keyRunner()
-    -- Key Detection
-    moveRight, moveLeft, moveUp, moveDown = false, false, false, false
-    if pressedKeys["d"] or pressedKeys["right"] then
+-- Require and call
+local vjoy = require "Addons.ponywolf.vjoy"
+
+local leftStick = vjoy.newStick() -- default stick
+leftStick.x, leftStick.y = cx, cy
+
+
+local function axis(event)
+
+    print ("X: " .. event.x - leftStick.x .. " Y: " .. event.y - leftStick.y)
+
+    -- If exceed 100 or -100 then adjust stick position
+    if event.x - leftStick.x > 100 then
+        leftStick.x = event.x - 100
+    end if event.x - leftStick.x < -100 then
+        leftStick.x = event.x + 100
+    end
+
+    if event.y - leftStick.y > 100 then
+        leftStick.y = event.y - 100
+    end if event.y - leftStick.y < -100 then
+        leftStick.y = event.y + 100
+    end
+
+    -- Round whether moving left or right
+    if event.x > leftStick.x + 20 then
         moveRight = true
-    end if pressedKeys["a"] or pressedKeys["left"] then
+        moveLeft = false
+    end if event.x < leftStick.x - 20 then
+        moveRight = false
         moveLeft = true
-    end if pressedKeys["w"] or pressedKeys["up"] then
-        moveUp = true
-    end if pressedKeys["s"] or pressedKeys["down"] then
-        moveDown = true
-    end
-
-    -- Finalised Movement
-    if moveRight and moveLeft then
+    end if event.x < leftStick.x + 20 and event.x > leftStick.x - 20 then
         moveRight, moveLeft = false, false
-    end if moveUp and moveDown then
-        moveUp, moveDown = false, false
     end
 
-    -- Move Player
     if moveRight then
-        player.x = player.x + 5
+        print("Move Right: ")
     end if moveLeft then
-        player.x = player.x - 5
-    end if moveUp then
-        player.y = player.y - 5
-    end if moveDown then
-        player.y = player.y + 5
+        print("Move Left: ")
     end
-end
 
--- Key event handler
-local function onKeyEvent(event)
-    if event.phase == "down" then
-        pressedKeys[event.keyName] = true
-    elseif event.phase == "up" then
-        pressedKeys[event.keyName] = false
+    -- Reset stick position
+    if event.phase == "ended" then
+        leftStick.x, leftStick.y = cx, cy
     end
-end
 
--- Event listeners
-Runtime:addEventListener("enterFrame", keyRunner)
-Runtime:addEventListener("key", onKeyEvent)
+end
+leftStick:addEventListener("touch", axis)
+
+-- ------------------------------------------------------------------------------------
+-- -- Move Player -- Keyboard
+-- ------------------------------------------------------------------------------------
+
+-- local moveRight, moveLeft = false, false
+-- local moveUp, moveDown = false, false
+-- local pressedKeys = {}
+
+-- local function keyRunner()
+--     -- Key Detection
+--     moveRight, moveLeft, moveUp, moveDown = false, false, false, false
+--     if pressedKeys["d"] or pressedKeys["right"] then
+--         moveRight = true
+--     end if pressedKeys["a"] or pressedKeys["left"] then
+--         moveLeft = true
+--     end if pressedKeys["w"] or pressedKeys["up"] then
+--         moveUp = true
+--     end if pressedKeys["s"] or pressedKeys["down"] then
+--         moveDown = true
+--     end
+
+--     -- Finalised Movement
+--     if moveRight and moveLeft then
+--         moveRight, moveLeft = false, false
+--     end if moveUp and moveDown then
+--         moveUp, moveDown = false, false
+--     end
+
+--     -- Move Player
+--     if moveRight then
+--         player.x = player.x + 5
+--     end if moveLeft then
+--         player.x = player.x - 5
+--     end if moveUp then
+--         player.y = player.y - 5
+--     end if moveDown then
+--         player.y = player.y + 5
+--     end
+-- end
+
+-- -- Key event handler
+-- local function onKeyEvent(event)
+--     if event.phase == "down" then
+--         pressedKeys[event.keyName] = true
+--     elseif event.phase == "up" then
+--         pressedKeys[event.keyName] = false
+--     end
+-- end
+
+-- -- Event listeners
+-- Runtime:addEventListener("enterFrame", keyRunner)
+-- Runtime:addEventListener("key", onKeyEvent)
 
 
 
