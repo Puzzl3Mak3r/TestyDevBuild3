@@ -71,7 +71,7 @@ Runtime:addEventListener("enterFrame", moveCamera) -- never got used
 local leftStick = display.newCircle(cx/3, cy + 300, 100)
 local leftInner = display.newCircle(cx/3, cy + 300, 50)
 leftStick.alpha = 0.5
-leftInner.alpha = 0.7
+leftInner.alpha = 0.5
 
 -- local leftStick = vjoy.newStick() -- default stick
 leftStick.x, leftStick.y = cx/3, cy + 300
