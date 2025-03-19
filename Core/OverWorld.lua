@@ -65,19 +65,22 @@ Runtime:addEventListener("enterFrame", moveCamera) -- never got used
 
 
 ------------------------------------------------------------------------------------
--- Move Player -- Virtual Joystick - Made by PonyWolf
+-- Move Player -- Virtual Joystick - Inspired by PonyWolf
 ------------------------------------------------------------------------------------
 
--- Require and call
-local vjoy = require "Addons.ponywolf.vjoy"
+local leftStick = display.newCircle(cx/3, cy + 300, 100)
+local leftInner = display.newCircle(cx/3, cy + 300, 50)
+leftStick.alpha = 0.5
+leftInner.alpha = 0.7
 
-local leftStick = vjoy.newStick() -- default stick
-leftStick.x, leftStick.y = cx, cy
+-- local leftStick = vjoy.newStick() -- default stick
+leftStick.x, leftStick.y = cx/3, cy + 300
 
 
 local function axis(event)
 
-    -- print ("X" .. event.x - leftStick.x .. " Y" .. event.y - leftStick.y)
+    -- Small circle
+    leftInner.x, leftInner.y = event.x, event.y
 
     -- If exceed 100 or -100 then adjust stick position
     if event.x - leftStick.x > 100 then
@@ -116,7 +119,8 @@ local function axis(event)
 
     -- Reset stick position
     if event.phase == "ended" then
-        leftStick.x, leftStick.y = cx, cy
+        leftStick.x, leftStick.y = cx/3, cy + 300
+        leftInner.x, leftInner.y = cx/3, cy + 300
         moveRight, moveLeft, moveUp, moveDown = false, false, false, false
         joyStickPressed = false
     else
@@ -125,19 +129,43 @@ local function axis(event)
 
 
 end
-leftStick:addEventListener("touch", axis)
+
+-- Whenever the left side of the screen is pressed, move thew stick to that location
+local leftSideRect = display.newRect( 0, 0, cx, cy*2)
+leftSideRect.anchorX, leftSideRect.anchorY = 0, 0
+leftSideRect.alpha = 0.01
+leftSideRect:addEventListener("touch", axis)
+
+-- Whenever stick is pressed, move player
 
 Runtime:addEventListener("enterFrame", function()
+    -- Printing stuff (can be commented out)
     if moveRight then
         print("Move Right")
     end if moveLeft then
         print("Move Left")
-    end
-
-    if moveUp then
+    end if moveUp then
         print("Move Up")
     end if moveDown then
         print("Move Down")
+    end
+
+    -- Finalised Movement
+    if moveRight and moveLeft then
+        moveRight, moveLeft = false, false
+    end if moveUp and moveDown then
+        moveUp, moveDown = false, false
+    end
+
+    -- Move Player    
+    if moveRight then
+        player.x = player.x + 5
+    end if moveLeft then
+        player.x = player.x - 5
+    end if moveUp then
+        player.y = player.y - 5
+    end if moveDown then
+        player.y = player.y + 5
     end
 end)
 
