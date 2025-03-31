@@ -31,7 +31,7 @@ local moveUp, moveDown = false, false
 ------------------------------------------------------------------------------------
 
 -- Make player
-local player = display.newRect(cx, cy, 20, 20)
+local player = display.newRect(cx, cy, 100, 100)
 player:setFillColor(0, 0, 1)
 
 
@@ -127,13 +127,10 @@ local function axis(event)
 end
 
 -- Whenever the left side of the screen is pressed, move thew stick to that location
-local leftSideRect = display.newRect( 0, 0, cx, cy*2)
+local leftSideRect = display.newRect( -1.8*cx, -cy/2, cx*3, cy*3)
 leftSideRect.anchorX, leftSideRect.anchorY = 0, 0
 leftSideRect.alpha = 0.01
 leftSideRect:addEventListener("touch", axis)
-
--- Whenever stick is pressed, move player
-
 
 
 
@@ -141,73 +138,12 @@ leftSideRect:addEventListener("touch", axis)
 -- Different movement options
 -- ------------------------------------------------------------------------------------
 
--- -- Fixed 2 degree motion -- Left and Right w/ 
--- local stickDiffX = 0
--- Runtime:addEventListener("enterFrame", function()
---     -- Printing stuff (can be commented out)
---     if moveRight then
---         print("Move Right")
---     end if moveLeft then
---         print("Move Left")
---     end
-
---     -- Find difference
---     stickDiffX = math.abs(leftStickOuter.x - leftStickInner.x)
-
---     -- Finalised Movement
---     if moveRight and moveLeft then
---         moveRight, moveLeft = false, false
---     end
---     moveUp, moveDown = false, false
-
---     -- Move Player
---     if moveRight then
---         player.x = player.x + (stickDiffX / 12)
---     end if moveLeft then
---         player.x = player.x - (stickDiffX / 12)
---     end
--- end
--- )
-
--- -- Fixed 8 degree motion
--- Runtime:addEventListener("enterFrame", function()
---     -- Printing stuff (can be commented out)
---     if moveRight then
---         print("Move Right")
---     end if moveLeft then
---         print("Move Left")
---     end if moveUp then
---         print("Move Up")
---     end if moveDown then
---         print("Move Down")
---     end
-
---     -- Finalised Movement
---     if moveRight and moveLeft then
---         moveRight, moveLeft = false, false
---     end if moveUp and moveDown then
---         moveUp, moveDown = false, false
---     end
-
---     -- Move Player    
---     if moveRight then
---         player.x = player.x + 5
---     end if moveLeft then
---         player.x = player.x - 5
---     end if moveUp then
---         player.y = player.y - 5
---     end if moveDown then
---         player.y = player.y + 5
---     end
--- end)
-
 -- Free 360 degree motion
 local stickDiffX, stickDiffY = 0, 0
 Runtime:addEventListener("enterFrame", function()
     -- Find difference
     stickDiffX = leftStickInner.x - leftStickOuter.x
     stickDiffY = leftStickInner.y - leftStickOuter.y
-    print(stickDiffX, stickDiffY)
 
     -- stickDiffX and stickDiffY must not be between 20 and -20
     if stickDiffX > 20 or stickDiffX < -20 or stickDiffY > 20 or stickDiffY < -20 then

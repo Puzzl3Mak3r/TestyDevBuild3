@@ -127,13 +127,10 @@ local function axis(event)
 end
 
 -- Whenever the left side of the screen is pressed, move thew stick to that location
-local leftSideRect = display.newRect( 0, 0, cx, cy*2)
+local leftSideRect = display.newRect( -1.8*cx, -cy/2, cx*3, cy*3)
 leftSideRect.anchorX, leftSideRect.anchorY = 0, 0
 leftSideRect.alpha = 0.01
 leftSideRect:addEventListener("touch", axis)
-
--- Whenever stick is pressed, move player
-
 
 
 
@@ -144,12 +141,11 @@ leftSideRect:addEventListener("touch", axis)
 -- -- Fixed 2 degree motion -- Left and Right w/ 
 -- local stickDiffX = 0
 -- Runtime:addEventListener("enterFrame", function()
---     -- Printing stuff (can be commented out)
---     if moveRight then
---         print("Move Right")
---     end if moveLeft then
---         print("Move Left")
---     end
+-- --     if moveRight then
+-- --         print("Move Right")
+-- --     end if moveLeft then
+-- --         print("Move Left")
+-- --     end
 
 --     -- Find difference
 --     stickDiffX = math.abs(leftStickOuter.x - leftStickInner.x)
@@ -171,16 +167,15 @@ leftSideRect:addEventListener("touch", axis)
 
 -- -- Fixed 8 degree motion
 -- Runtime:addEventListener("enterFrame", function()
---     -- Printing stuff (can be commented out)
---     if moveRight then
---         print("Move Right")
---     end if moveLeft then
---         print("Move Left")
---     end if moveUp then
---         print("Move Up")
---     end if moveDown then
---         print("Move Down")
---     end
+-- --     if moveRight then
+-- --         print("Move Right")
+-- --     end if moveLeft then
+-- --         print("Move Left")
+-- --     end if moveUp then
+-- --         print("Move Up")
+-- --     end if moveDown then
+-- --         print("Move Down")
+-- --     end
 
 --     -- Finalised Movement
 --     if moveRight and moveLeft then
@@ -207,7 +202,7 @@ Runtime:addEventListener("enterFrame", function()
     -- Find difference
     stickDiffX = leftStickInner.x - leftStickOuter.x
     stickDiffY = leftStickInner.y - leftStickOuter.y
-    print(stickDiffX, stickDiffY)
+    -- print(stickDiffX, stickDiffY)
 
     -- stickDiffX and stickDiffY must not be between 20 and -20
     if stickDiffX > 20 or stickDiffX < -20 or stickDiffY > 20 or stickDiffY < -20 then
