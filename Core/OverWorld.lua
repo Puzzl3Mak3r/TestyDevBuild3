@@ -23,7 +23,6 @@ local followCamMiddGrp = display.newGroup() -- Middleground
 local followCamForeGrp = display.newGroup() -- Foreground
 local moveRight, moveLeft = false, false
 local moveUp, moveDown = false, false
-local joyStickPressed = false
 
 
 
@@ -142,8 +141,35 @@ leftSideRect:addEventListener("touch", axis)
 -- Different movement options
 -- ------------------------------------------------------------------------------------
 
--- -- Fixed 8 degree motion
+-- -- Fixed 2 degree motion -- Left and Right w/ 
+-- local stickDiffX = 0
+-- Runtime:addEventListener("enterFrame", function()
+--     -- Printing stuff (can be commented out)
+--     if moveRight then
+--         print("Move Right")
+--     end if moveLeft then
+--         print("Move Left")
+--     end
 
+--     -- Find difference
+--     stickDiffX = math.abs(leftStickOuter.x - leftStickInner.x)
+
+--     -- Finalised Movement
+--     if moveRight and moveLeft then
+--         moveRight, moveLeft = false, false
+--     end
+--     moveUp, moveDown = false, false
+
+--     -- Move Player
+--     if moveRight then
+--         player.x = player.x + (stickDiffX / 12)
+--     end if moveLeft then
+--         player.x = player.x - (stickDiffX / 12)
+--     end
+-- end
+-- )
+
+-- -- Fixed 8 degree motion
 -- Runtime:addEventListener("enterFrame", function()
 --     -- Printing stuff (can be commented out)
 --     if moveRight then
@@ -176,10 +202,11 @@ leftSideRect:addEventListener("touch", axis)
 -- end)
 
 -- Free 360 degree motion
+local stickDiffX, stickDiffY = 0, 0
 Runtime:addEventListener("enterFrame", function()
     -- Find difference
-    local stickDiffX = leftStickInner.x - leftStickOuter.x
-    local stickDiffY = leftStickInner.y - leftStickOuter.y
+    stickDiffX = leftStickInner.x - leftStickOuter.x
+    stickDiffY = leftStickInner.y - leftStickOuter.y
     print(stickDiffX, stickDiffY)
 
     -- stickDiffX and stickDiffY must not be between 20 and -20

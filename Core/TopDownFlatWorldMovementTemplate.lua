@@ -23,7 +23,6 @@ local followCamMiddGrp = display.newGroup() -- Middleground
 local followCamForeGrp = display.newGroup() -- Foreground
 local moveRight, moveLeft = false, false
 local moveUp, moveDown = false, false
-local joyStickPressed = false
 
 
 
@@ -41,22 +40,22 @@ player:setFillColor(0, 0, 1)
 -- Virtual Camera
 ------------------------------------------------------------------------------------
 
-local diffX = 0
-local diffY = 0
+local camDiffX = 0
+local camDiffY = 0
 local function moveCamera()
     if playing then
         -- Center the camera on the player
-        diffX = cx - player.x
-        diffY = cy - player.y
+        camDiffX = cx - player.x
+        camDiffY = cy - player.y
 
-        -- followCamForeGrp.x = diffX * 1.2
-        -- followCamForeGrp.y = diffY * 1.2
+        -- followCamForeGrp.x = camDiffX * 1.2
+        -- followCamForeGrp.y = camDiffY * 1.2
 
-        followCamMiddGrp.x = diffX
-        followCamMiddGrp.y = diffY
+        followCamMiddGrp.x = camDiffX
+        followCamMiddGrp.y = camDiffY
 
-        -- followCamBackGrp.x = diffX * 0.8
-        -- followCamBackGrp.y = diffY * 0.8
+        -- followCamBackGrp.x = camDiffX * 0.8
+        -- followCamBackGrp.y = camDiffY * 0.8
     end
 end
 
@@ -68,66 +67,63 @@ Runtime:addEventListener("enterFrame", moveCamera) -- never got used
 -- Move Player -- Virtual Joystick - Inspired by PonyWolf
 ------------------------------------------------------------------------------------
 
-local leftStick = display.newCircle(cx/3, cy + 300, 100)
-local leftInner = display.newCircle(cx/3, cy + 300, 50)
-leftStick.alpha = 0.5
-leftInner.alpha = 0.7
+local leftStickOuter = display.newCircle(cx/3, cy + 300, 130)
+local leftStickInner = display.newCircle(cx/3, cy + 300, 50)
+leftStickOuter.alpha = 0.5
+leftStickInner.alpha = 0.5
 
--- local leftStick = vjoy.newStick() -- default stick
-leftStick.x, leftStick.y = cx/3, cy + 300
+-- 360 degree movement
+local directionX, directionY = 0, 0
+
+leftStickOuter.x, leftStickOuter.y = cx/3, cy + 300
 
 
 local function axis(event)
 
     -- Small circle
-    leftInner.x, leftInner.y = event.x, event.y
+    leftStickInner.x, leftStickInner.y = event.x, event.y
 
     -- If exceed 100 or -100 then adjust stick position
-    if event.x - leftStick.x > 100 then
-        leftStick.x = event.x - 100
-    end if event.x - leftStick.x < -100 then
-        leftStick.x = event.x + 100
+    if event.x - leftStickOuter.x > 100 then
+        leftStickOuter.x = event.x - 100
+    end if event.x - leftStickOuter.x < -100 then
+        leftStickOuter.x = event.x + 100
     end
 
-    if event.y - leftStick.y > 100 then
-        leftStick.y = event.y - 100
-    end if event.y - leftStick.y < -100 then
-        leftStick.y = event.y + 100
+    if event.y - leftStickOuter.y > 100 then
+        leftStickOuter.y = event.y - 100
+    end if event.y - leftStickOuter.y < -100 then
+        leftStickOuter.y = event.y + 100
     end
 
     -- Round whether moving left or right
-    if event.x > leftStick.x + 20 then
+    if event.x > leftStickOuter.x + 20 then
         moveRight = true
         moveLeft = false
-    end if event.x < leftStick.x - 20 then
+    end if event.x < leftStickOuter.x - 20 then
         moveRight = false
         moveLeft = true
-    end if event.x < leftStick.x + 20 and event.x > leftStick.x - 20 then
+    end if event.x < leftStickOuter.x + 20 and event.x > leftStickOuter.x - 20 then
         moveRight, moveLeft = false, false
     end
 
     -- Round whether moving up or down
-    if event.y < leftStick.y - 20 then
+    if event.y < leftStickOuter.y - 20 then
         moveUp = true
         moveDown = false
-    end if event.y > leftStick.y + 20 then
+    end if event.y > leftStickOuter.y + 20 then
         moveUp = false
         moveDown = true
-    end if event.y < leftStick.y + 20 and event.y > leftStick.y - 20 then
+    end if event.y < leftStickOuter.y + 20 and event.y > leftStickOuter.y - 20 then
         moveUp, moveDown = false, false
     end
 
     -- Reset stick position
     if event.phase == "ended" then
-        leftStick.x, leftStick.y = cx/3, cy + 300
-        leftInner.x, leftInner.y = cx/3, cy + 300
+        leftStickOuter.x, leftStickOuter.y = cx/3, cy + 300
+        leftStickInner.x, leftStickInner.y = cx/3, cy + 300
         moveRight, moveLeft, moveUp, moveDown = false, false, false, false
-        joyStickPressed = false
-    else
-        joyStickPressed = true
     end
-
-
 end
 
 -- Whenever the left side of the screen is pressed, move thew stick to that location
@@ -138,36 +134,93 @@ leftSideRect:addEventListener("touch", axis)
 
 -- Whenever stick is pressed, move player
 
+
+
+
+-- ------------------------------------------------------------------------------------
+-- Different movement options
+-- ------------------------------------------------------------------------------------
+
+-- -- Fixed 2 degree motion -- Left and Right w/ 
+-- local stickDiffX = 0
+-- Runtime:addEventListener("enterFrame", function()
+--     -- Printing stuff (can be commented out)
+--     if moveRight then
+--         print("Move Right")
+--     end if moveLeft then
+--         print("Move Left")
+--     end
+
+--     -- Find difference
+--     stickDiffX = math.abs(leftStickOuter.x - leftStickInner.x)
+
+--     -- Finalised Movement
+--     if moveRight and moveLeft then
+--         moveRight, moveLeft = false, false
+--     end
+--     moveUp, moveDown = false, false
+
+--     -- Move Player
+--     if moveRight then
+--         player.x = player.x + (stickDiffX / 12)
+--     end if moveLeft then
+--         player.x = player.x - (stickDiffX / 12)
+--     end
+-- end
+-- )
+
+-- -- Fixed 8 degree motion
+-- Runtime:addEventListener("enterFrame", function()
+--     -- Printing stuff (can be commented out)
+--     if moveRight then
+--         print("Move Right")
+--     end if moveLeft then
+--         print("Move Left")
+--     end if moveUp then
+--         print("Move Up")
+--     end if moveDown then
+--         print("Move Down")
+--     end
+
+--     -- Finalised Movement
+--     if moveRight and moveLeft then
+--         moveRight, moveLeft = false, false
+--     end if moveUp and moveDown then
+--         moveUp, moveDown = false, false
+--     end
+
+--     -- Move Player    
+--     if moveRight then
+--         player.x = player.x + 5
+--     end if moveLeft then
+--         player.x = player.x - 5
+--     end if moveUp then
+--         player.y = player.y - 5
+--     end if moveDown then
+--         player.y = player.y + 5
+--     end
+-- end)
+
+-- Free 360 degree motion
+local stickDiffX, stickDiffY = 0, 0
 Runtime:addEventListener("enterFrame", function()
-    -- Printing stuff (can be commented out)
-    if moveRight then
-        print("Move Right")
-    end if moveLeft then
-        print("Move Left")
-    end if moveUp then
-        print("Move Up")
-    end if moveDown then
-        print("Move Down")
-    end
+    -- Find difference
+    stickDiffX = leftStickInner.x - leftStickOuter.x
+    stickDiffY = leftStickInner.y - leftStickOuter.y
+    print(stickDiffX, stickDiffY)
 
-    -- Finalised Movement
-    if moveRight and moveLeft then
-        moveRight, moveLeft = false, false
-    end if moveUp and moveDown then
-        moveUp, moveDown = false, false
-    end
+    -- stickDiffX and stickDiffY must not be between 20 and -20
+    if stickDiffX > 20 or stickDiffX < -20 or stickDiffY > 20 or stickDiffY < -20 then
+        -- Find the angle
+        directionX = math.atan2(stickDiffY, stickDiffX)
+        directionY = math.atan2(stickDiffY, stickDiffX)
 
-    -- Move Player    
-    if moveRight then
-        player.x = player.x + 5
-    end if moveLeft then
-        player.x = player.x - 5
-    end if moveUp then
-        player.y = player.y - 5
-    end if moveDown then
-        player.y = player.y + 5
+        -- Move Player
+        player.x = player.x + math.cos(directionX) * 5
+        player.y = player.y + math.sin(directionY) * 5
     end
 end)
+
 
 
 
