@@ -1,0 +1,6 @@
+main.lua - Main function/scene/file handler for what is going on in the screen, will call other functions based on Keywords.csv and temp.csv (this is located in local Documents folder)
+
+\Spaces - File for loading worlds, levels
+\Core - The functions that is called by main.lua; it does all the computing, so it's very easy to mod just by using that
+\Assets - I think yall know what this is for
+\Addons - Stuff that other ppl have made outside of this repository. Hopefully I remember to credit them
