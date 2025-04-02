@@ -80,6 +80,11 @@ leftStickOuter.x, leftStickOuter.y = cx/3, cy + 300
 
 local function axis(event)
 
+    if event.phase == "began" then
+        leftStickOuter.x, leftStickOuter.y = event.x, event.y
+        leftStickInner.x, leftStickInner.y = event.x, event.y
+    end
+
     -- Small circle
     leftStickInner.x, leftStickInner.y = event.x, event.y
 

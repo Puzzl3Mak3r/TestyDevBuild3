@@ -27,6 +27,14 @@ local moveUp, moveDown = false, false
 
 
 ------------------------------------------------------------------------------------
+-- Environment
+------------------------------------------------------------------------------------
+
+-- Load from file
+
+
+
+------------------------------------------------------------------------------------
 -- Player
 ------------------------------------------------------------------------------------
 
@@ -71,18 +79,20 @@ local leftStickOuter = display.newCircle(cx/3, cy + 300, 130)
 local leftStickInner = display.newCircle(cx/3, cy + 300, 50)
 leftStickOuter.alpha = 0.5
 leftStickInner.alpha = 0.5
-
--- 360 degree movement
-local directionX, directionY = 0, 0
-
 leftStickOuter.x, leftStickOuter.y = cx/3, cy + 300
 
 
 local function axis(event)
 
+    if event.phase == "began" then
+        leftStickOuter.x, leftStickOuter.y = event.x, event.y
+        leftStickInner.x, leftStickInner.y = event.x, event.y
+    end
+
     -- Small circle
     leftStickInner.x, leftStickInner.y = event.x, event.y
 
+    -- Move outer circle
     -- If exceed 100 or -100 then adjust stick position
     if event.x - leftStickOuter.x > 100 then
         leftStickOuter.x = event.x - 100
@@ -96,33 +106,11 @@ local function axis(event)
         leftStickOuter.y = event.y + 100
     end
 
-    -- Round whether moving left or right
-    if event.x > leftStickOuter.x + 20 then
-        moveRight = true
-        moveLeft = false
-    end if event.x < leftStickOuter.x - 20 then
-        moveRight = false
-        moveLeft = true
-    end if event.x < leftStickOuter.x + 20 and event.x > leftStickOuter.x - 20 then
-        moveRight, moveLeft = false, false
-    end
-
-    -- Round whether moving up or down
-    if event.y < leftStickOuter.y - 20 then
-        moveUp = true
-        moveDown = false
-    end if event.y > leftStickOuter.y + 20 then
-        moveUp = false
-        moveDown = true
-    end if event.y < leftStickOuter.y + 20 and event.y > leftStickOuter.y - 20 then
-        moveUp, moveDown = false, false
-    end
-
     -- Reset stick position
     if event.phase == "ended" then
         leftStickOuter.x, leftStickOuter.y = cx/3, cy + 300
         leftStickInner.x, leftStickInner.y = cx/3, cy + 300
-        moveRight, moveLeft, moveUp, moveDown = false, false, false, false
+        -- moveRight, moveLeft, moveUp, moveDown = false, false, false, false -------- Not used in 360 degrees
     end
 end
 
@@ -139,7 +127,7 @@ leftSideRect:addEventListener("touch", axis)
 -- ------------------------------------------------------------------------------------
 
 -- Free 360 degree motion
-local stickDiffX, stickDiffY = 0, 0
+local directionX, directionY, stickDiffX, stickDiffY = 0, 0, 0, 0
 Runtime:addEventListener("enterFrame", function()
     -- Find difference
     stickDiffX = leftStickInner.x - leftStickOuter.x
