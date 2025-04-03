@@ -25,7 +25,7 @@ local SceneManager = {}
 
 
 ------------------------------------------------------------------------------------
--- Writing, Reading and Parsing
+-- Writing && Reading && Parsing
 ------------------------------------------------------------------------------------
 
 -- Convert commas to ¤
@@ -127,5 +127,5 @@ local function CheckUpdate()
     end
 end
 
--- Check update every second
-timer.performWithDelay(2200, function() CheckUpdate() end, 0)
+-- Check update every 2 seconds
+timer.performWithDelay(2500, function() CheckUpdate() end, 0)
