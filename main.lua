@@ -118,7 +118,14 @@ local function CheckUpdate()
     print ("Checking for updates")
     readWriteTempFile("O")
     if FileTemp[1][1] == "New" then
+        -- Print the new scene
         print ("New Scene")
+        print (FileTemp[1][2])
+
+        -- Get rid of old scene
+        currentScene = nil
+
+        -- Load the new scene
         currentScene = FileTemp[1][2]
         sceneHandler(currentScene)
 

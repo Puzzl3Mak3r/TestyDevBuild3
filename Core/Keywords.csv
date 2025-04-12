@@ -1,3 +1,5 @@
-StartScreen,Core.3DRunner
+StartScreen,Core.StartScreen
+
+ThreeDee,Core.3DRunner
 MainGame,Core.MainGame
 StartScreen,Core.StartScreen
