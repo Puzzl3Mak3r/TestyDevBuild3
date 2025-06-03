@@ -64,7 +64,8 @@ end
 -- Write the StartScreen
 local FileTemp = io.open( system.pathForFile( "temp.csv", system.DocumentsDirectory ), "w" )
 if FileTemp then
-    FileTemp:write("New,StartScreen")
+    FileTemp:write("New,MainGame")
+    -- FileTemp:write("New,StartScreen")
     io.close( FileTemp )
 else print ("Error: Cannot overwrite file to be reset - File does not exist - Line 47")
 end
