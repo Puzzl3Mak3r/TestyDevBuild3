@@ -11,124 +11,109 @@
 --                                                                                            \______/                                  
 
 
+
 ------------------------------------------------------------------------------------
--- Parameters
+-- Requirements
 ------------------------------------------------------------------------------------
 
-local io = require("io")
--- local file = require("file")
-
-local fullw         = display.actualContentWidth
-local fullh         = display.actualContentHeight
-local cx            = display.contentCenterX
-local cy            = display.contentCenterY
-local screenX       = display.contentWidth
-local screenY       = display.contentHeight
-
-local startX        = cx
-local startY        = cy
-
-local adjustX       = screenX/480
-local adjustY       = screenY/320
+local physics = require("physics")
+physics.start()
+physics.setGravity(0, 50)
 
 
 
 ------------------------------------------------------------------------------------
--- Key Runner
+-- Display Constants
 ------------------------------------------------------------------------------------
 
--- Detect Keys
+local cx, cy = display.contentCenterX, display.contentCenterY
+local screenX, screenY = display.contentWidth, display.contentHeight
+
+
+
+------------------------------------------------------------------------------------
+-- Input Tracking
+------------------------------------------------------------------------------------
+
 local pressedKeys = {}
-
-function onKeyEvent(event)
+local function onKeyEvent(event)
     if event.phase == "down" then
         pressedKeys[event.keyName] = true
     elseif event.phase == "up" then
         pressedKeys[event.keyName] = false
-    else
-        pressedKeys[event.keyName] = false
     end
+    return false
 end
-
 Runtime:addEventListener("key", onKeyEvent)
 
 
 
 ------------------------------------------------------------------------------------
--- Player && Physics
+-- Ground Platform
 ------------------------------------------------------------------------------------
 
+local ground = display.newRect(cx, cy + 300, 600, 60)
+ground:setFillColor(0.3)
+physics.addBody(ground, "static", {bounce = 0})
+ground.name = "ground"
+
+
+
+------------------------------------------------------------------------------------
 -- Player
-local player = display.newRect(cx, cy, 100, 100)
-physics.addBody(player, "dynamic", { bounce = 0 })
+------------------------------------------------------------------------------------
 
--- Player Properties
-player.name = "Player"
-player.x = startX
-player.y = startY
-player.Vx = 0
-player.Vy = 0
-
-
--- Change Gravity
-physics.setGravity(0, 25)
-
--- Add platform
-local platform = display.newRect(cx, cy + 300, 500, 50)
-physics.addBody(platform, "static", { bounce = 0 })
+local player = display.newRect(cx, cy, 50, 50)
+player:setFillColor(0.1, 0.6, 1)
+physics.addBody(player, "dynamic", {bounce = 0, friction = 1})
+player.isGrounded = false
+player.isFixedRotation = true
 
 
 
 ------------------------------------------------------------------------------------
--- Camera
+-- Ground Detection
 ------------------------------------------------------------------------------------
 
-local camDiffX = 0
-local camDiffY = 0
-
-local function moveCamera()
-    -- Center the camera on the player
-    camDiffX = cx - player.x
-    camDiffY = cy - player.y
-
-    -- followCamForeGrp.x = camDiffX * 1.2
-    -- followCamForeGrp.y = camDiffY * 1.2
+local function onCollision(event)
+    if event.phase == "began" then
+        if event.other.name == "ground" then
+            player.isGrounded = true
+        end
+    elseif event.phase == "ended" then
+        if event.other.name == "ground" then
+            player.isGrounded = false
+        end
+    end
 end
-
-Runtime:addEventListener("enterFrame", moveCamera)
+player:addEventListener("collision", onCollision)
 
 
 
 ------------------------------------------------------------------------------------
--- Functions
+-- Jumping Logic
 ------------------------------------------------------------------------------------
 
-local jumps = 1
-
-local function ResetJumps()
-    print( "collision" )
-    if math.floor( player.Vy ) == 0 then
-        jumps = 1
-        print( "Jump has been reset" )
+local function jump()
+    if player.isGrounded then
+        player:applyLinearImpulse(0, -0.5, player.x, player.y)
+        player.isGrounded = false -- Prevent re-jumping until grounded again
     end
 end
 
-local function Jump()
-    if jumps > 0 then
-        player:applyLinearImpulse( 0, -1.5, player.x, player.y )
-        print( "Player Jumped" )
-        jumps = jumps - 1
-    -- else
-    --     ResetJumps()
+-- Touch to jump
+Runtime:addEventListener("touch", function(event)
+    if event.phase == "began" then
+        jump()
     end
-end
+end)
 
-Runtime:addEventListener("touch", function (event) if event.phase == "began" then Jump() end end)
-Runtime:addEventListener("key", function() if pressedKeys["space"] then Jump() end end)
-Runtime:addEventListener("enterFrame", ResetJumps)
--- player:addEventListener("enterFrame", ResetJumps)
+-- Spacebar to jump
 Runtime:addEventListener("enterFrame", function()
-    player.Vx, player.Vy = player:getLinearVelocity()
+    if pressedKeys["space"] then
+        jump()
+        pressedKeys["space"] = false -- prevent holding space
+    end
 end)
 
 
@@ -136,13 +121,12 @@ end)
 ------------------------------------------------------------------------------------
 -- Function Calling
 ------------------------------------------------------------------------------------
-local introScreen = {}
 
-function introScreen.Start()
-    print("Start Screen Anim")
-    -- Animate("add")
-    -- Animate("animate")
+local platforming = {}
+
+function platforming.Start()
+    print("Platforming")
 end
 
 -- Need to return or Solar2D will run into errors. It's not really returning any value
-return introScreen
+return platforming

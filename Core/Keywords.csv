@@ -1,5 +1,5 @@
-StartScreen,Core.StartScreen
+
 
 ThreeDee,Core.3DRunner
-MainGame,Core.MainGame
+MainGame,Core.PlatformerBase
 StartScreen,Core.StartScreen
