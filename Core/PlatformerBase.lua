@@ -139,11 +139,11 @@ local function axis(event)
             joystickInner.x, joystickInner.y = fx/4, fy*3/4
             right, left = false, false
         end
-        
-        print ("Too far right")
+
+        -- print ("Too far right")
         return
-    else
-        print ("Not too far right")
+    -- else
+    --     print ("Not too far right")
     end
     if event.phase == "began" then
         joystickOuter.x, joystickOuter.y = event.x, event.y
@@ -199,9 +199,16 @@ Runtime:addEventListener("enterFrame", movePlayer)
 
 -- Jumping
 -- -- Mobile
-Runtime:addEventListener("touch", function(event)
+-- Button to jump
+local jumpButton = display.newCircle(fx*3/4, fy*3/4, 70)
+jumpButton.alpha = 0.7
+jumpButton:addEventListener("touch", function(event)
     if event.phase == "began" then
         jump()
+        jumpButton.alpha = 0.4
+    end
+    if event.phase == "ended" then
+        jumpButton.alpha = 0.7
     end
 end)
 
