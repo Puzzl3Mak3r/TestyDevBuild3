@@ -70,7 +70,7 @@ ground.objectType = "ground"
 -- Player
 ------------------------------------------------------------------------------------
 
-local player = display.newRect(cx, cy, 50, 50)
+local player = display.newRect(cx, cy+50, 50, 50)
 cameraGroup:insert(player)
 player:setFillColor(0.1, 0.6, 1)
 physics.addBody(player, "dynamic", {bounce = 0, friction = 1})
@@ -172,6 +172,7 @@ Runtime:addEventListener("key", onKeyEvent)
 -- -- $$ |      $$ |  $$\ 
 -- -- $$ |      \$$$$$$  |
 -- -- \__|       \______/ 
+-- -- Enable for using & building to PC
 
 
 
@@ -218,19 +219,19 @@ Runtime:addEventListener("key", onKeyEvent)
 -- ------------------------------------------------------------------------------------
 -- ---- Jumping
 
--- -- Z to jump
--- local function jumpPC()
---     if pressedKeys["z"] then
+-- local function jumpPC(event)
+--     if event.phase == "down" and event.keyName == "z" then
 --         jump()
---         -- pressedKeys["z"] = false -- prevent holding space
 --     end
 
 --     -- Cut jump short when releasing space
---         if Vy < -0.5 and not pressedKeys["z"] then
---             player:setLinearVelocity(0, -0.5)
---         end
+--     if event.phase == "up" and event.keyName == "z" and Vy < -0.5 then
+--         player:setLinearVelocity(0, -0.5)
+--     end
 -- end
--- Runtime:addEventListener("enterFrame", jumpPC)
+
+-- Runtime:addEventListener("key", jumpPC)
+
 
 
 -- ------------------------------------------------------------------------------------
@@ -259,6 +260,7 @@ Runtime:addEventListener("key", onKeyEvent)
 -- $$ |\$  /$$ |$$ |  $$ |$$ |  $$ |$$ |$$ |$$   ____|
 -- $$ | \_/ $$ |\$$$$$$  |$$$$$$$  |$$ |$$ |\$$$$$$$\ 
 -- \__|     \__| \______/ \_______/ \__|\__| \_______|
+-- Enable for using & building to Mobile
 
 
 
@@ -324,7 +326,6 @@ function jumpMobile (event)
     end
 end
 jumpButton:addEventListener("touch", jumpMobile)
-
 
 -- Joystick to move
 local joystickInner = display.newCircle(fx/4, fy*3/4, 50)
