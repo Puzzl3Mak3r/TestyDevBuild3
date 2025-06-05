@@ -30,7 +30,6 @@ physics.setGravity(0, 50)
 local leftMiddlePartOfScreen = display.newRect(fx/4,cy,fx*3/4,fy*1.5)
 leftMiddlePartOfScreen.alpha = 0.01
 local pressedKeys = {}
-local amountToMove = 0
 
 -- Groups
 local cameraGroup = display.newGroup()
@@ -44,22 +43,7 @@ local dashSpeed = 1000
 local maxJumps = 1
 local jumps = maxJumps
 local stillTouchingGround = false
-
-
-
--- ------------------------------------------------------------------------------------
--- -- Input Tracking
--- ------------------------------------------------------------------------------------
-
--- local function onKeyEvent(event)
---     if event.phase == "down" then
---         pressedKeys[event.keyName] = true
---     elseif event.phase == "up" then
---         pressedKeys[event.keyName] = false
---     end
---     return false
--- end
--- Runtime:addEventListener("key", onKeyEvent)
+local facingRight = true
 
 
 
@@ -245,15 +229,17 @@ local function movePlayer()
     -- Move Left / Right
     if left then
         player.x = player.x - 7
+        facingRight = false
     elseif right then
         player.x = player.x + 7
+        facingRight = true
     end
     left, right = false, false
 
-    if pressedKeys["left"] or pressedKeys["a"] then
+    if pressedKeys["left"] --[[ or pressedKeys["a"] ]] then
         left = true
     end
-    if pressedKeys["right"] or pressedKeys["d"] then
+    if pressedKeys["right"] --[[ or pressedKeys["d"] ]] then
         right = true
     end
 end
@@ -276,11 +262,9 @@ local function dash()
     local cachVx, cachVy = player:getLinearVelocity()
 
     -- Determine dash direction
-    local direction = 0
-    if right then
+    local direction = -1
+    if facingRight then
         direction = 1
-    elseif left then
-        direction = -1
     end
 
     -- Temporarily disable gravity for a smoother dash
