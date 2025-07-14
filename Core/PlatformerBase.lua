@@ -21,14 +21,14 @@ local cx, cy = display.contentCenterX, display.contentCenterY
 local fx, fy = display.contentWidth, display.contentHeight
 
 -- Physics
-local physics = require("physics")
+local physics = require('physics')
 physics.start()
 physics.setGravity(0, 50)
--- physics.setDrawMode("hybrid")
+-- physics.setDrawMode('hybrid')
 
 -- Buttons, Joysticks, Mouse and Keyboard Variables
 local leftMiddlePartOfScreen = display.newRect(fx/4,cy,fx*3/4,fy*1.5)
-leftMiddlePartOfScreen.alpha = 0.01
+leftMiddlePartOfScreen.alpha = 0.01 -- It wont work if isVisible is false
 local pressedKeys = {}
 
 -- Groups
@@ -40,23 +40,36 @@ local hasDashed = false
 local isDashing = false
 local dashDuration = 100  -- milliseconds
 local dashSpeed = 1000
-local maxJumps = 1
+local maxJumps = 3
 local jumps = maxJumps
 local stillTouchingGround = false
 local facingRight = true
 
+-- PC only
+local jumping = false -- idk how tf this is working with this but it works
+
+-- Mobile only
+
 
 
 ------------------------------------------------------------------------------------
--- Ground Platform
+-- Ground Platform(s)
 ------------------------------------------------------------------------------------
 
+-- First one is for display
 local ground = display.newRect(cx, cy + 300, 600, 60)
 cameraGroup:insert(ground)
 ground:setFillColor(0.3)
-physics.addBody(ground, "static", {bounce = 0})
-ground.objectType = "ground"
+physics.addBody(ground, 'static', {bounce = 0})
 ground.isSolid = true
+
+-- Second is for reseting jumps, dashes, etc
+local groundWithReset = display.newRect(cx, cy + 271, 590, 2)
+cameraGroup:insert(groundWithReset)
+physics.addBody( groundWithReset, 'static', {bounce = 0})
+groundWithReset.isSolid = true
+groundWithReset.objectType = 'ground'
+groundWithReset.isVisible = false -- makes it invisible without the 0 alpha problem
 
 
 
@@ -67,7 +80,7 @@ ground.isSolid = true
 local player = display.newRect(cx, cy+50, 50, 50)
 cameraGroup:insert(player)
 player:setFillColor(0.1, 0.6, 1)
-physics.addBody(player, "dynamic", {bounce = 0, friction = 1})
+physics.addBody(player, 'dynamic', {bounce = 0, friction = 1})
 player.isGrounded = false
 player.isFixedRotation = true
 local Vx, Vy = 0, 0 -- Velocity
@@ -84,6 +97,7 @@ local followObject = display.newCircle(0, 0, 50)
 cameraGroup:insert(followObject)
 followObject.x, followObject.y = player.x, player.y
 followObject.alpha = 0.3
+-- followObject.isVisible = false -- disable in debug
 followObject.fill = {1,1,0}
 
 -- Some Variables
@@ -104,7 +118,7 @@ local function followPlayer()
     cameraGroup.y = diffY
 end
 
-Runtime:addEventListener("enterFrame", followPlayer)
+Runtime:addEventListener('enterFrame', followPlayer)
 
 
 
@@ -113,23 +127,37 @@ Runtime:addEventListener("enterFrame", followPlayer)
 ------------------------------------------------------------------------------------
 
 ------------------------------------------------------------------------------------
----- Grounding Check
+---- Grounding Check and Reset
 
+-- Pre Collision Reset
+function onPreCollision(event)
+    if event.contact.isTouching and event.other.objectType == 'ground' then
+        print('touching ground')
+        hasDashed = false
+    end
+    print('pre collision')
+end
+
+-- On Collision Reset
 local function onCollision(event)
-    if event.other.objectType == "ground" and event.other.isSolid == true then
-        if event.phase == "ended" then
+    if event.other.objectType == 'ground' and event.other.isSolid == true then
+        if event.phase == 'ended' then
             -- Player is not grounded
             player.isGrounded = false
             stillTouchingGround = false
-        elseif event.phase == "began" then
+        elseif event.phase == 'began' then
             -- Player is grounded
             player.isGrounded = true
             stillTouchingGround = true
+            -- Resets
+            jumps = maxJumps
         end
+        print(event.phase)
     end
 end
 
-player:addEventListener("collision", onCollision)
+player:addEventListener('preCollision', onPreCollision)
+player:addEventListener('collision', onCollision)
 
 
 
@@ -140,12 +168,12 @@ local function keepTrackOfVelocity()
     -- Velocity
     Vx, Vy = player:getLinearVelocity()
     -- Resets
-    if stillTouchingGround then
+    if stillTouchingGround and not jumping then
         hasDashed = false
         jumps = maxJumps
     end
 end
-Runtime:addEventListener("enterFrame", keepTrackOfVelocity)
+Runtime:addEventListener('enterFrame', keepTrackOfVelocity)
 
 
 
@@ -153,14 +181,14 @@ Runtime:addEventListener("enterFrame", keepTrackOfVelocity)
 ---- Key Event handler (PC) but can be used for emulators ig
 
 local function onKeyEvent(event)
-    if event.phase == "down" then
+    if event.phase == 'down' then
         pressedKeys[event.keyName] = true
-    elseif event.phase == "up" then
+    elseif event.phase == 'up' then
         pressedKeys[event.keyName] = false
     end
 end
 
-Runtime:addEventListener("key", onKeyEvent)
+Runtime:addEventListener('key', onKeyEvent)
 
 
 
@@ -198,21 +226,24 @@ local function jump()
         player:setLinearVelocity(0, -500)
         player.isGrounded = false
         jumps = jumps - 1
+        print('jumping now false')
     end
 end
 
 local function jumpPC(event)
-    if event.phase == "down" and event.keyName == "z" then
+    if event.phase == 'down' and event.keyName == 'z' then
         jump()
+        jumping = true
+        print('jumping now true')
     end
 
     -- -- Cut jump short when releasing space -- cancelled bcos we cant do on mobile
-    -- if event.phase == "up" and event.keyName == "z" and Vy < -0.5 then
+    -- if event.phase == 'up' and event.keyName == 'z' and Vy < -0.5 then
     --     player:setLinearVelocity(0, -0.5)
     -- end
 end
 
-Runtime:addEventListener("key", jumpPC)
+Runtime:addEventListener('key', jumpPC)
 
 
 
@@ -235,21 +266,20 @@ local function movePlayer()
     end
     left, right = false, false
 
-    if pressedKeys["left"] --[[ or pressedKeys["a"] ]] then
+    if pressedKeys['left'] --[[ or pressedKeys['a'] ]] then
         left = true
     end
-    if pressedKeys["right"] --[[ or pressedKeys["d"] ]] then
+    if pressedKeys['right'] --[[ or pressedKeys['d'] ]] then
         right = true
     end
 end
 
-Runtime:addEventListener("enterFrame", movePlayer)
+Runtime:addEventListener('enterFrame', movePlayer)
 
 
 
 ------------------------------------------------------------------------------------
 ---- Dashing
-
 
 local function dash()
     if isDashing or hasDashed then return end
@@ -265,6 +295,8 @@ local function dash()
     if facingRight then
         direction = 1
     end
+
+    print('dashing now true')
 
     -- Temporarily disable gravity for a smoother dash
     player.gravityScale = 0
@@ -282,13 +314,13 @@ local function dash()
 end
 
 local function dashPC(event)
-    if event.phase == "down" and event.keyName == "x" then
+    if event.phase == 'down' and event.keyName == 'x' then
         dash()
-        print ("Dashing")
+        print ('Dashing')
     end
 end
 
-Runtime:addEventListener("key", dashPC)
+Runtime:addEventListener('key', dashPC)
 
 
 
@@ -315,17 +347,16 @@ Runtime:addEventListener("key", dashPC)
 -- ------------------------------------------------------------------------------------
 -- ---- Jumping
 
-
 -- local jumpButton = display.newCircle(fx*3/4, fy*3/4, 70)
 -- local jumpButtonPressed = false
 -- jumpButton.alpha = 0.7
 -- local function jump()
 --     if player.isGrounded then
---         player:applyLinearImpulse(0, -0.5, player.x, player.y)
+--         jumps = maxJumps
 --         player.isGrounded = false -- Prevent re-jumping until grounded again
 --     end
---     -- Keep jumping when touching ground and button held down
---     if player.isGrounded and jumpButtonPressed then
+--     if jumps >= 1 then
+--         player:setLinearVelocity(Vx, 2) -- idk its mobile
 --         player:applyLinearImpulse(0, -0.5, player.x, player.y)
 --     end
 -- end
@@ -344,7 +375,7 @@ Runtime:addEventListener("key", dashPC)
 --     end
 -- end
 
--- Runtime:addEventListener("enterFrame", movePlayer)
+-- Runtime:addEventListener('enterFrame', movePlayer)
 
 
 
@@ -353,12 +384,12 @@ Runtime:addEventListener("key", dashPC)
 
 -- -- Button to jump
 -- function jumpMobile (event)
---     if event.phase == "began" then
+--     if event.phase == 'began' then
 --         jumpButtonPressed = true
 --         jump()
 --         jumpButton.alpha = 0.4
 --     end
---     if event.phase == "ended" then
+--     if event.phase == 'ended' then
 --         jumpButtonPressed = false
 --         -- -- Cut jump short when button released -- Cancelled after testing
 --         -- if Vy < -0.5 then
@@ -367,7 +398,7 @@ Runtime:addEventListener("key", dashPC)
 --         jumpButton.alpha = 0.7
 --     end
 -- end
--- jumpButton:addEventListener("touch", jumpMobile)
+-- jumpButton:addEventListener('touch', jumpMobile)
 
 -- -- Joystick to move
 -- local joystickInner = display.newCircle(fx/4, fy*3/4, 50)
@@ -379,18 +410,18 @@ Runtime:addEventListener("key", dashPC)
 --     -- Check if the touch is not too much on the right side
 --     if event.x > cx then
 --         -- Return joystick to idle
---         if event.phase == "ended" then
+--         if event.phase == 'ended' then
 --             joystickOuter.x, joystickOuter.y = fx/4, fy*3/4
 --             joystickInner.x, joystickInner.y = fx/4, fy*3/4
 --             right, left = false, false
 --         end
 
---         -- print ("Too far right")
+--         -- print ('Too far right')
 --         return
 --     else
---         -- print ("Not too far right")
+--         -- print ('Not too far right')
 
---         if event.phase == "began" then
+--         if event.phase == 'began' then
 --             joystickOuter.x, joystickOuter.y = event.x, event.y
 --             joystickInner.x, joystickInner.y = event.x, event.y
 --         end
@@ -429,14 +460,14 @@ Runtime:addEventListener("key", dashPC)
 --         end
 
 --         -- Return joystick to idle
---         if event.phase == "ended" then
+--         if event.phase == 'ended' then
 --             joystickOuter.x, joystickOuter.y = fx/4, fy*3/4
 --             joystickInner.x, joystickInner.y = fx/4, fy*3/4
 --             right, left = false, false
 --         end
 --     end
 -- end
--- leftMiddlePartOfScreen:addEventListener("touch", axis)
+-- leftMiddlePartOfScreen:addEventListener('touch', axis)
 
 -- ------------------------------------------------------------------------------------
 -- ---- Dashing
@@ -459,7 +490,7 @@ Runtime:addEventListener("key", dashPC)
 --         direction = 1
 --     end
 
---     -- Temporarily disable gravity for a smoother dash
+--     -- Temporarily disable gravity for a better dash
 --     player.gravityScale = 0
 --     player:setLinearVelocity(dashSpeed * direction, 0)
 
@@ -475,16 +506,16 @@ Runtime:addEventListener("key", dashPC)
 -- end
 
 -- local function dashMobile(event)
---     if event.phase == "began" then
+--     if event.phase == 'began' then
 --         dashButton.alpha = 0.4
 --     end
---     if event.phase == "ended" then
+--     if event.phase == 'ended' then
 --         dash()
 --         dashButton.alpha = 0.7
 --     end
 -- end
 
--- dashButton:addEventListener("touch", dashMobile)
+-- dashButton:addEventListener('touch', dashMobile)
 
 
 
@@ -495,7 +526,7 @@ Runtime:addEventListener("key", dashPC)
 local platforming = {}
 
 function platforming.Start()
-    print("Platforming")
+    print('Platforming')
 end
 
 -- Need to return or Solar2D will run into errors. It's not really returning any value
