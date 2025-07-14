@@ -132,10 +132,10 @@ Runtime:addEventListener('enterFrame', followPlayer)
 -- Pre Collision Reset
 function onPreCollision(event)
     if event.contact.isTouching and event.other.objectType == 'ground' then
-        print('touching ground')
+        -- print('touching ground')
         hasDashed = false
     end
-    print('pre collision')
+    -- print('pre collision')
 end
 
 -- On Collision Reset
@@ -158,6 +158,26 @@ end
 
 player:addEventListener('preCollision', onPreCollision)
 player:addEventListener('collision', onCollision)
+
+
+
+------------------------------------------------------------------------------------
+---- Jumping
+
+local function jump()
+    if isDashing then
+        -- Interrupt dash immediately
+        isDashing = false
+        player.gravityScale = 1
+    end
+
+    if jumps >= 1 then -- allow jumping any time if you want (remove this `or true` if not)
+        player:setLinearVelocity(0, -500)
+        player.isGrounded = false
+        jumps = jumps - 1
+        print('jumping now false')
+    end
+end
 
 
 
@@ -215,20 +235,7 @@ Runtime:addEventListener('key', onKeyEvent)
 ------------------------------------------------------------------------------------
 ---- Jumping
 
-local function jump()
-    if isDashing then
-        -- Interrupt dash immediately
-        isDashing = false
-        player.gravityScale = 1
-    end
-
-    if jumps >= 1 then -- allow jumping any time if you want (remove this `or true` if not)
-        player:setLinearVelocity(0, -500)
-        player.isGrounded = false
-        jumps = jumps - 1
-        print('jumping now false')
-    end
-end
+-- The function for jumping is a Universal Function
 
 local function jumpPC(event)
     if event.phase == 'down' and event.keyName == 'z' then
@@ -350,16 +357,8 @@ Runtime:addEventListener('key', dashPC)
 -- local jumpButton = display.newCircle(fx*3/4, fy*3/4, 70)
 -- local jumpButtonPressed = false
 -- jumpButton.alpha = 0.7
--- local function jump()
---     if player.isGrounded then
---         jumps = maxJumps
---         player.isGrounded = false -- Prevent re-jumping until grounded again
---     end
---     if jumps >= 1 then
---         player:setLinearVelocity(Vx, 2) -- idk its mobile
---         player:applyLinearImpulse(0, -0.5, player.x, player.y)
---     end
--- end
+
+-- -- The function for jumping is a Universal Function
 
 
 
@@ -385,16 +384,12 @@ Runtime:addEventListener('key', dashPC)
 -- -- Button to jump
 -- function jumpMobile (event)
 --     if event.phase == 'began' then
---         jumpButtonPressed = true
+--         jumping = true
 --         jump()
 --         jumpButton.alpha = 0.4
 --     end
 --     if event.phase == 'ended' then
---         jumpButtonPressed = false
---         -- -- Cut jump short when button released -- Cancelled after testing
---         -- if Vy < -0.5 then
---         --     player:setLinearVelocity(0, -0.5)
---         -- end
+--         jumping = false
 --         jumpButton.alpha = 0.7
 --     end
 -- end
