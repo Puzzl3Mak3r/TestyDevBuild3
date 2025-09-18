@@ -13,6 +13,12 @@
 -- Important
 ------------------------------------------------------------------------------------
 
+-- Set display content to fully transparent black
+local backfill = display.newRect(display.contentCenterX, display.contentCenterY, display.contentWidth, display.contentHeight)
+backfill:setFillColor(0, 0, 0, 0.0) -- fully transparent alpha
+backfill.blendMode = "alpha" -- optional, might help
+backfill:toBack()
+
 system.activate("multitouch")
 local physics = require("physics")
 system.activate( "physics" )
@@ -21,6 +27,55 @@ local io = require("io")
 local currentScene = ""
 local currentLoad = ""
 local SceneManager = {}
+
+-- -- Fullscreen Toggle
+-- native.setProperty("windowMode", "fullscreen")
+
+-- local function toggleFullscreen()
+--     if native.getProperty( "windowMode" ) == "fullscreen" then
+--         native.setProperty( "windowMode", "normal" )
+--     else
+--         native.setProperty( "windowMode", "fullscreen" )
+--     end
+-- end
+
+-- Runtime:addEventListener( "key", function( event )
+--     if event.keyName == "f" and event.phase == "down" then
+--         toggleFullscreen()
+--     end
+-- end )
+
+local screenW, screenH = display.pixelWidth, display.pixelHeight
+print("Screen Size:", screenW, screenH)
+
+
+------------------------------------------------------------------------------------
+-- Make Transparent
+------------------------------------------------------------------------------------
+
+-- idk later
+local transparentOn = false
+
+local function toggleTransparency()
+    if transparentOn then
+        os.execute('restorewindow.exe')  -- restore normal window
+        transparentOn = false
+    else
+        os.execute('transparentbackground.exe')  -- make transparent
+        transparentOn = true
+    end
+end
+
+-- Bind toggle to a key, e.g., spacebar
+local function onKey(event)
+    if event.phase == "up" and event.keyName == "space" then
+        toggleTransparency()
+    end
+    return false
+end
+
+Runtime:addEventListener("key", onKey)
+
 
 
 

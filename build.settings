@@ -5,6 +5,14 @@
 
 settings =
 {
+	window = {
+        titleText = {
+            default = "TestyDevBuild3",
+        },
+        resizable = true,
+    },
+
+
 	orientation =
 	{
 		-- Supported values for orientation:
